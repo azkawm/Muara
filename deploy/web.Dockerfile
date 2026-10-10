@@ -21,5 +21,7 @@ ARG VITE_WALLETCONNECT_PROJECT_ID=
 RUN pnpm --filter @muara/web exec vite build
 
 FROM caddy:2
-COPY deploy/Caddyfile /etc/caddy/Caddyfile
+# deploy/Caddyfile terminates TLS itself; deploy/Caddyfile.proxied sits behind host nginx.
+ARG CADDYFILE=deploy/Caddyfile
+COPY ${CADDYFILE} /etc/caddy/Caddyfile
 COPY --from=build /repo/apps/web/dist /srv

@@ -1,0 +1,17 @@
+# Behind a host reverse proxy (nginx + certbot): plain HTTP on two internal ports.
+# :80 serves the frontend, :8081 forwards to the backend container.
+{
+	auto_https off
+}
+
+:80 {
+	encode zstd gzip
+	root * /srv
+	try_files {path} /index.html
+	file_server
+}
+
+:8081 {
+	encode zstd gzip
+	reverse_proxy backend:8787
+}
