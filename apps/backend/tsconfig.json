@@ -1,0 +1,7 @@
+{
+  "extends": "@muara/tsconfig/node.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["src", "test", "scripts", "tsup.config.ts", "drizzle.config.ts", "vitest.config.ts"]
+}

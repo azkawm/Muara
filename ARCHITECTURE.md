@@ -183,10 +183,16 @@ muara/
 
 ### Backend modules
 
-- **keeper:** tracks borrowers from pool events, reads health factor via `MuaraLens` every block, calls `liquidate` from a prefunded wallet when HF < 1 and the price is fresh.
-- **scenarios:** steps the oracle price over 10 to 20 s toward a target (earnings miss -20%, beat +25%, weekend gap, reset), optionally starting from a live Pyth price.
-- **api:** admin-only endpoints for the scenario panel and market-hours override. The admin key stays on the server; requests are authorized by an admin wallet signature.
-- **indexer:** user tx history and LayerZero delivery status in SQLite.
+`apps/backend`, one Node process. `MODULES=prices,keeper,indexer` picks what runs.
+
+- **prices:** heartbeat re-pushes the NVDA price once it is 20 min old (the hub treats 6 h as stale). Scenarios step the oracle over 15 s in 8 updates, relative to an anchor of $150: miss -20% ($120), beat +25% ($187.50), weekend gap -12% in one update ($132), reset. `target` moves gradually to an exact price; the demo's Scenario B uses `target 190` because +25% stops just short of Budi's ~$188 liquidation. Pyth anchoring is optional and needs `HERMES_API_KEY` (the public Hermes endpoint now answers 401).
+- **keeper:** every account that ever borrowed (from indexed `Borrow` events) is checked with one multicall per tick. Below HF 1 with fresh prices it repays the largest debt against the largest collateral, buying NVDA on the exchange first when covering a short. Positions under HF 1.2 are listed as at risk.
+- **indexer:** polls pool, short module and rewards module logs into SQLite and records each `CrossChainDelivery`. A tracker polls LayerZero Scan (`/messages/tx/{hash}`) and moves deliveries through sent, verified, delivered or failed. The log range per call adapts to the RPC's cap.
+- **api (Hono):** `GET /api/health`, `/api/price`, `/api/scenarios`, `/api/history/:address`, `/api/activity`, `/api/keeper`; admin `POST /api/admin/scenario` (`{scenario}` or `{target}`), `/api/admin/price`, `/api/admin/anchor`. Admin calls carry an EIP-191 signature by the deployer over method, path, timestamp and body (`adminMessage` in `@muara/shared`), valid 5 min and once. The session override is an owner call on the risk engine, so the admin panel sends it straight from the deployer wallet.
+- **admin CLI:** `pnpm --filter @muara/backend admin scenario miss|beat|weekendGap|reset`, `admin target 190`, `admin price 150`, `admin status`.
+- **Nonces:** backend wallets use viem's local nonce manager. Alchemy's load-balanced RPC briefly reported stale nonces right after confirmations ("replacement transaction underpriced"). Keeper approvals run on the first tick, so an RPC failure retries instead of stopping the server.
+- **Gas:** every backend write uses the estimate plus 30%. On a fork, exact estimates ran out of gas for both `openShort` and `setPrice`; the frontend should apply the same buffer to pool and module calls.
+- **Verified:** unit tests (admin auth, scenario math, event mapping, LayerZero status, RPC range parsing) and an end to end run on a Base Sepolia fork: Rina's borrow to Arbitrum indexed with its delivery, Budi's short, `target 190` drained his HF to 0.989, the keeper liquidated (25 NVDA repaid, 4,987.5 USDC seized), `reset` returned to $150.
 
 ### Deploy runbook
 
@@ -201,10 +207,10 @@ Foundry scripts write addresses to `packages/shared/deployments/<chain>.json`. R
 
 The sequence was rehearsed end to end on local forks of both testnets, including a real LayerZero fee quote, Rina's borrow to Arbitrum, a USDC reward claim and Budi's full short cycle.
 
-### Scripts (TypeScript, to come)
+### Scripts
 
-- `scenario`: CLI wrapper over the backend scenario module.
-- `demo-reset`: wraps `redeploy:hub` and refreshes the backend's addresses.
+- Scenarios: the backend admin CLI above.
+- Full reset: `pnpm --filter @muara/contracts redeploy:hub`, then restart the backend so it indexes from the new deploy block.
 
 ### Hosting (VPS)
 
@@ -224,19 +230,20 @@ Exact versions are pinned in the lockfile at scaffold time.
 | All TS | Node 24 LTS, TypeScript 5.9, pnpm 10, Turborepo 2 | One toolchain, cached builds across packages |
 | | viem 2.x | Typed contract calls shared by web, backend and scripts |
 | | @wagmi/cli 2.x | Generates typed ABIs from Foundry artifacts into `shared` |
-| | zod 3.x | Validates env and config at startup |
-| Backend | Hono 4.x | Small typed HTTP API |
-| | Drizzle ORM + better-sqlite3 | Zero-ops history store |
+| | zod 4 | Validates env and request bodies |
+| Backend | Hono 4 + @hono/node-server | Small typed HTTP API |
+| | Drizzle ORM (sqlite-proxy) on Node's built-in `node:sqlite` | Zero-ops history store with no native build (better-sqlite3 needed a Python toolchain on Windows) |
 | | pino | Structured keeper logs |
-| | @pythnetwork/hermes-client | Real starting prices for scenarios |
-| Frontend | React 19 + Vite 6 | Fast dev loop, no SSR needed |
-| | wagmi 2 + TanStack Query 5 | Wallet state and cached chain reads |
+| | Hermes REST via fetch | Optional real starting price; hermes-client 3.1 broke under ESM (old axios) |
+| | tsup, tsx | Bundled build for Docker, TypeScript dev runner |
+| Frontend | React 19 + Vite 8 | Fast dev loop, no SSR needed |
+| | wagmi 2.19 + TanStack Query 5 | Wallet state and cached chain reads; wagmi 3 is out but RainbowKit 2 still requires wagmi 2 |
 | | RainbowKit 2 | Polished connect flow and chain switching |
 | | TanStack Router | Typed routes for Markets, Dashboard, Short, Admin |
 | | Tailwind CSS 4 | CSS variable tokens map directly to the design system |
 | | Radix UI primitives | Accessible modals, tabs, tooltips styled our way |
 | | lightweight-charts 5 | Live price and P&L charts |
-| Test | Vitest 3 | Backend and shared math tests |
+| Test | Vitest 5 | Backend tests |
 | Hosting | Docker Compose + Caddy 2 | One command deploy, automatic HTTPS on the VPS domain |
 
 ## 6. Frontend information architecture
@@ -251,6 +258,16 @@ Aave-style flows with Muara's own identity.
 - **Admin:** scenario panel and market-hours override, visible only to the admin wallet.
 - **Global:** fixed "Simulation mode" badge; market-hours badge per stock (open, closed, weekend, paused).
 
+
+### Frontend implementation notes
+
+- `apps/web`: routes Markets (`/`), Dashboard, Short, History, Admin (shown only to the pool owner, which is the backend admin).
+- Every write goes through `useTx`: switch to Base, simulate with `errorsAbi` merged in (library reverts decode to plain messages), estimate gas plus 30%, send, wait, toast with a BaseScan link, refresh all reads. Approvals are requested only when the allowance is short.
+- Health factor previews in modals and the short form are computed client side from the Lens user view (`features/account/math.ts`, mirroring `HealthLogic`), so they update per keystroke; the Lens `previewAction` remains available. Liquidation prices come from bisecting that model on the stock price.
+- Cross-chain withdraw, borrow and USDC reward claims quote `quoteDelivery` and send the fee plus 5%; LayerZero refunds the excess.
+- Admin actions sign `adminMessage` with the connected deployer wallet; the session override is a direct risk engine transaction.
+- The price chart plots oracle prices polled from `/api/price` since page load (no stored price history).
+- Dev: `pnpm --filter @muara/web dev` with the backend on :8787 (Vite proxies `/api`). Config in `apps/web/.env.example`.
 ## 7. Design language: Estuary
 
 Concept: tributaries (chains, assets, users) converge into one calm, deep channel (the registry). Dark first, with a light mode.

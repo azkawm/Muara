@@ -1,0 +1,182 @@
+@import "tailwindcss";
+
+/*
+ * Estuary design tokens (ARCHITECTURE.md section 7). Raw values live on :root and switch
+ * with data-theme; Tailwind utilities read them through @theme inline.
+ */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-raised: var(--surface-raised);
+  --color-line: var(--border);
+  --color-ink: var(--text);
+  --color-ink-2: var(--text-2);
+  --color-ink-3: var(--text-3);
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-tide: var(--tide);
+  --color-silt: var(--silt);
+  --color-pos: var(--pos);
+  --color-neg: var(--neg);
+  --color-hf-safe: var(--hf-safe);
+  --color-hf-watch: var(--hf-watch);
+  --color-hf-danger: var(--hf-danger);
+  --color-hf-critical: var(--hf-critical);
+
+  --font-sans: "Instrument Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, SFMono-Regular, monospace;
+  --font-display: "Instrument Sans Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --text-caption: 12px;
+  --text-small: 13px;
+  --text-body: 14px;
+  --text-lead: 16px;
+  --text-h4: 20px;
+  --text-h3: 24px;
+  --text-h2: 32px;
+  --text-h1: 44px;
+
+  --radius-input: 6px;
+  --radius-card: 10px;
+  --radius-modal: 16px;
+}
+
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0b1418;
+  --surface: #111e24;
+  --surface-raised: #172a31;
+  --border: #23383f;
+  --text: #e8f1ef;
+  --text-2: #9db3b0;
+  --text-3: #6b8380;
+  --brand: #2fb8a6;
+  --brand-ink: #04211d;
+  --tide: #7c83f2;
+  --silt: #d9a441;
+  --pos: #3fbf7f;
+  --neg: #e5484d;
+  --hf-safe: #3fbf7f;
+  --hf-watch: #d9a441;
+  --hf-danger: #f08a3c;
+  --hf-critical: #e5484d;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f4f7f6;
+  --surface: #ffffff;
+  --surface-raised: #eef3f2;
+  --border: #d6e0de;
+  --text: #0f1f24;
+  --text-2: #46605d;
+  --text-3: #7a8f8c;
+  --brand: #128c7e;
+  --brand-ink: #ffffff;
+  --tide: #4f56d1;
+  --silt: #a87414;
+  --pos: #1e8e57;
+  --neg: #c8262c;
+  --hf-safe: #1e8e57;
+  --hf-watch: #a87414;
+  --hf-danger: #c2620f;
+  --hf-critical: #c8262c;
+}
+
+@layer base {
+  /* Background on html only: a body background would paint over fixed negative-z backdrops (DotGrid). */
+  html {
+    background: var(--bg);
+  }
+  body {
+    background: transparent;
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--brand) 35%, transparent);
+  }
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+}
+
+@utility num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* River motion: slow currents and in-transit dashes. Off under reduced motion. */
+@keyframes current {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 200px 0;
+  }
+}
+@keyframes flow-dash {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+@keyframes drift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+/* Loading pill: a soft sweep of light across a muted bar. */
+@utility skeleton {
+  display: inline-block;
+  border-radius: 9999px;
+  background-image: linear-gradient(
+    90deg,
+    var(--surface-raised) 0%,
+    color-mix(in srgb, var(--surface-raised) 60%, var(--text-3)) 50%,
+    var(--surface-raised) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+@utility animate-current {
+  animation: current 10s linear infinite;
+}
+@utility animate-flow-dash {
+  animation: flow-dash 1.2s linear infinite;
+}
+@utility animate-drift {
+  animation: drift 60s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Wallet dialog (RainbowKit) shares the frosted look of the app modals. */
+[data-rk] [role="dialog"] > div {
+  backdrop-filter: blur(24px) saturate(150%);
+}

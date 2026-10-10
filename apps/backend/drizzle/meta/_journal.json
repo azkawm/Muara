@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1791607584058,
+      "tag": "0000_fantastic_ender_wiggin",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1791631007356,
+      "tag": "0001_typical_smiling_tiger",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1791639652271,
+      "tag": "0002_left_silver_centurion",
+      "breakpoints": true
+    }
+  ]
+}

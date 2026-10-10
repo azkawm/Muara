@@ -15,3 +15,8 @@ contracts/broadcast/**/dry-run/
 # Backend
 *.sqlite
 *.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+
+# Backend local data
+apps/backend/data/

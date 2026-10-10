@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <!-- Muara mark: three tributaries flowing into one channel. Every chain flows to one registry. -->
+  <defs>
+    <linearGradient id="m" x1="8" y1="32" x2="58" y2="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2FB8A6" stop-opacity="0.55"/>
+      <stop offset="0.55" stop-color="#2FB8A6"/>
+      <stop offset="1" stop-color="#7EE0D1"/>
+    </linearGradient>
+  </defs>
+  <path d="M8 14c12 0 18 10 24 16" stroke="url(#m)" stroke-width="3.6" stroke-linecap="round"/>
+  <path d="M8 32h24" stroke="url(#m)" stroke-width="3.6" stroke-linecap="round"/>
+  <path d="M8 50c12 0 18-10 24-16" stroke="url(#m)" stroke-width="3.6" stroke-linecap="round"/>
+  <path d="M32 32h25" stroke="url(#m)" stroke-width="9" stroke-linecap="round"/>
+</svg>

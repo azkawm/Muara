@@ -22,6 +22,9 @@
       "allowedVersions": {
         "ethers": "5"
       }
-    }
+    },
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }

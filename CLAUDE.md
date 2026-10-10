@@ -62,4 +62,4 @@ Weekdays only: weekends use the same margin cuts as an ordinary closed session.
 Agreed and recorded in `ARCHITECTURE.md` (contracts, LayerZero setup, monorepo layout, libraries, design tokens). Follow it; propose changes before deviating.
 
 ## Next step
-Contracts are deployed, verified and seeded on Base Sepolia and Arbitrum Sepolia (addresses in `packages/shared/deployments/`, deploy runbook in `ARCHITECTURE.md`). Deployer env vars are `PRIVATE_KEY` and `ADDRESS` in `contracts/.env`. Next: backend, then frontend.
+Contracts are deployed, verified and seeded on Base Sepolia and Arbitrum Sepolia (addresses in `packages/shared/deployments/`, deploy runbook in `ARCHITECTURE.md`). Deployer env vars are `PRIVATE_KEY` and `ADDRESS` in `contracts/.env`. Backend (`apps/backend`: prices, keeper, indexer, admin API, `pnpm admin` CLI) is verified on a fork and runs live; keeper, price updater, Rina and Budi each hold 0.01 Base Sepolia ETH. VPS files are in `deploy/`. Frontend (`apps/web`) is built: typecheck and production build pass; run `pnpm --filter @muara/web dev` with the backend running. Next: click-through test with a wallet, then VPS deploy.

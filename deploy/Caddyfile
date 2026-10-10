@@ -1,0 +1,13 @@
+# Frontend host: static build, SPA fallback.
+{$DOMAIN} {
+	encode zstd gzip
+	root * /srv
+	try_files {path} /index.html
+	file_server
+}
+
+# API host: everything goes to the backend container (routes are /api/...).
+{$API_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy backend:8787
+}
