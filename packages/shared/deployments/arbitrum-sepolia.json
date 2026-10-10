@@ -1,0 +1,9 @@
+{
+  "chainId": 421614,
+  "eid": 40231,
+  "tokens": {
+    "allowlist": "0xabef1e27A8F380231D50B7dBb45625f1afF49E69",
+    "nvda": "0xcA9A9adD1CB3daF3C5965c4b0f9B9fD7C76cBf8A",
+    "usdc": "0xAF342Ad0Cb59151696dd0ACd97Dd3589372b4644"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "chainId": 84532,
+  "eid": 40245,
+  "hub": {
+    "deployedAtBlock": 47918942,
+    "exchange": "0x57A81591e4731CFc7ff838bEF7A93Da7e7Ff94F0",
+    "lens": "0x94076A3c6aC01048adBa4ccDaD4AA24EfCEa1da5",
+    "oracle": "0x28f0fD86Bd0241D1C1cb87F7D4326778Bb6ab32D",
+    "pool": "0x1Ea08C5D59De765666DF2Cb1e7EC61554182eb79",
+    "rateModel": "0xc7F51E7a0BD64B120F752B5ba5d835A3C3Cc6d6f",
+    "rewardsModule": "0x0A461C9d33fE5d3B906639D0190643a1811F87F0",
+    "riskEngine": "0xcbEd2055F8F7f2F4FeCA0b78c4Eb826E42d70fde",
+    "shortModule": "0x847cfC1bD1332412978ff3fBa2674a8bb9CEbe1B"
+  },
+  "tokens": {
+    "allowlist": "0xabef1e27A8F380231D50B7dBb45625f1afF49E69",
+    "nvda": "0xcA9A9adD1CB3daF3C5965c4b0f9B9fD7C76cBf8A",
+    "usdc": "0xAF342Ad0Cb59151696dd0ACd97Dd3589372b4644"
+  }
+}

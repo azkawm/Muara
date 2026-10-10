@@ -1,0 +1,39 @@
+[profile.default]
+src = "src"
+test = "test"
+script = "script"
+out = "out"
+libs = ["node_modules"]
+solc_version = "0.8.28"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 200
+via_ir = false
+allow_paths = ["../node_modules"]
+fs_permissions = [{ access = "read-write", path = "../packages/shared/deployments" }]
+
+[profile.default.fuzz]
+runs = 256
+
+[profile.default.invariant]
+runs = 64
+depth = 64
+fail_on_revert = false
+
+[rpc_endpoints]
+base_sepolia = "${BASE_SEPOLIA_RPC_URL}"
+arbitrum_sepolia = "${ARBITRUM_SEPOLIA_RPC_URL}"
+
+[etherscan]
+base_sepolia = { key = "${ETHERSCAN_API_KEY}", chain = 84532 }
+arbitrum_sepolia = { key = "${ETHERSCAN_API_KEY}", chain = 421614 }
+
+[fmt]
+line_length = 120
+tab_width = 4
+bracket_spacing = true
+int_types = "long"
+
+[lint]
+# Market hours, price freshness and interest accrual depend on block.timestamp by design.
+exclude_lints = ["block-timestamp"]

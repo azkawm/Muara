@@ -1,0 +1,27 @@
+{
+  "name": "muara",
+  "private": true,
+  "packageManager": "pnpm@10.34.6",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "contracts:build": "pnpm --filter @muara/contracts build",
+    "contracts:test": "pnpm --filter @muara/contracts test",
+    "contracts:sizes": "pnpm --filter @muara/contracts sizes"
+  },
+  "devDependencies": {
+    "turbo": "2.11.7",
+    "typescript": "5.9.3"
+  },
+  "pnpm": {
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "ethers": "5"
+      }
+    }
+  }
+}

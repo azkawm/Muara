@@ -1,0 +1,4 @@
+{
+  "extends": "@muara/tsconfig/base.json",
+  "include": ["src"]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "@muara/shared",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@muara/tsconfig": "workspace:*",
+    "typescript": "5.9.3"
+  }
+}

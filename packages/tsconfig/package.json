@@ -1,0 +1,5 @@
+{
+  "name": "@muara/tsconfig",
+  "private": true,
+  "files": ["base.json", "node.json", "react.json"]
+}
