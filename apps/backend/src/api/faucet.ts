@@ -2,7 +2,6 @@ import { allowlistAbi, DEPLOYMENTS } from "@muara/shared";
 import { eq } from "drizzle-orm";
 import {
   createWalletClient,
-  http,
   parseEther,
   type Account,
   type Address,
@@ -14,7 +13,7 @@ import {
 } from "viem";
 import { privateKeyToAccount, nonceManager } from "viem/accounts";
 import { arbitrumSepolia, baseSepolia } from "viem/chains";
-import type { ChainClients } from "../chain/clients.js";
+import { chainTransport, type ChainClients } from "../chain/clients.js";
 import type { Config } from "../config/env.js";
 import type { Db } from "../db/client.js";
 import { faucetClaims } from "../db/schema.js";
@@ -45,8 +44,12 @@ export class Faucet {
     private readonly log: Logger,
   ) {
     const account = privateKeyToAccount(config.PRIVATE_KEY, { nonceManager });
-    this.base = createWalletClient({ account, chain: baseSepolia, transport: http(config.BASE_SEPOLIA_RPC_URL) });
-    this.arbitrum = createWalletClient({ account, chain: arbitrumSepolia, transport: http(config.ARBITRUM_SEPOLIA_RPC_URL) });
+    this.base = createWalletClient({ account, chain: baseSepolia, transport: chainTransport("base", config.BASE_SEPOLIA_RPC_URL) });
+    this.arbitrum = createWalletClient({
+      account,
+      chain: arbitrumSepolia,
+      transport: chainTransport("arbitrum", config.ARBITRUM_SEPOLIA_RPC_URL),
+    });
   }
 
   get address() {
